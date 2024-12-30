@@ -53,66 +53,56 @@ export async function createAirbnbHome({ userId }: { userId: string }) {
   }
 }
 
-export async function createCategoryPage(formData: FormData) {
-  const categoryName = formData.get("categoryName") as string;
-  const homeId = formData.get("homeId") as string;
-  const data = await prisma.home.update({
-    where: {
-      id: homeId,
-    },
-    data: {
-      categoryName: categoryName,
-      addedCategory: true,
-    },
-  });
-
-  return redirect(`/create/${homeId}/description`);
-}
-
 export async function CreateDescription(formData: FormData) {
-  const title = formData.get("title") as string;
-  const description = formData.get("description") as string;
-  const price = formData.get("price");
-  const imageFile = formData.get("image") as File;
-  const homeId = formData.get("homeId") as string;
+  const title = formData.get("title") as string | null;
+  const description = formData.get("description") as string | null;
+  const price = formData.get("price") as string | null;
+  const imageFile = formData.get("image") as File | null;
+  const homeId = formData.get("homeId") as string | null;
 
-  const guestNumber = formData.get("guest") as string;
-  const roomNumber = formData.get("room") as string;
-  const bathroomsNumber = formData.get("bathroom") as string;
+  const guestNumber = formData.get("guest") as string | null;
+  const roomNumber = formData.get("room") as string | null;
+  const bathroomsNumber = formData.get("bathroom") as string | null;
 
+  // Kiểm tra giá trị bắt buộc
+  if (!title || !description || !price || !imageFile || !homeId) {
+    throw new Error("Missing required fields.");
+  }
+
+  // Kiểm tra loại tệp ảnh
   const allowedContentTypes = ["image/png", "image/jpeg", "image/jpg"];
   if (!allowedContentTypes.includes(imageFile.type)) {
     throw new Error("Unsupported file format. Please upload a PNG or JPEG image.");
   }
 
-  // Tải lên tệp với contentType động
-  const { data: imageData, error } = await supabase.storage
+  // Upload ảnh lên Supabase
+  const { data: imageData, error: uploadError } = await supabase.storage
     .from("images")
     .upload(`${imageFile.name}-${Date.now()}`, imageFile, {
       cacheControl: "2592000",
       contentType: imageFile.type, // Sử dụng contentType thực tế
     });
 
-  if (error) {
-    throw new Error(`Failed to upload image: ${error.message}`);
+  if (uploadError) {
+    throw new Error(`Failed to upload image: ${uploadError.message}`);
   }
 
+  // Cập nhật dữ liệu nhà trong Prisma
   const data = await prisma.home.update({
-    where: {
-      id: homeId,
-    },
+    where: { id: homeId },
     data: {
-      title: title,
-      description: description,
+      title,
+      description,
       price: Number(price),
-      bedrooms: roomNumber,
-      bathrooms: bathroomsNumber,
-      guests: guestNumber,
+      bedrooms: Number(roomNumber) || 0,
+      bathrooms: Number(bathroomsNumber) || 0,
+      guests: Number(guestNumber) || 0,
       photo: imageData?.path,
       addedDescription: true,
     },
   });
 
+  // Chuyển hướng sau khi hoàn thành
   return redirect(`/create/${homeId}/address`);
 }
 
