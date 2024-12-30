@@ -54,15 +54,15 @@ export async function createAirbnbHome({ userId }: { userId: string }) {
 }
 
 export async function CreateDescription(formData: FormData) {
-  const title = formData.get("title") as string | null;
-  const description = formData.get("description") as string | null;
-  const price = formData.get("price") as string | null;
-  const imageFile = formData.get("image") as File | null;
-  const homeId = formData.get("homeId") as string | null;
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const price = formData.get("price") as string;
+  const imageFile = formData.get("image") as File;
+  const homeId = formData.get("homeId") as string;
 
-  const guestNumber = formData.get("guest") as string | null;
-  const roomNumber = formData.get("room") as string | null;
-  const bathroomsNumber = formData.get("bathroom") as string | null;
+  const guestNumber = formData.get("guest") as string;
+  const roomNumber = formData.get("room") as string;
+  const bathroomsNumber = formData.get("bathroom") as string;
 
   // Kiểm tra giá trị bắt buộc
   if (!title || !description || !price || !imageFile || !homeId) {
@@ -78,7 +78,7 @@ export async function CreateDescription(formData: FormData) {
   // Upload ảnh lên Supabase
   const { data: imageData, error: uploadError } = await supabase.storage
     .from("images")
-    .upload(`${imageFile.name}-${Date.now()}`, imageFile, {
+    .upload(`${imageFile.name}-${new Date()}`, imageFile, {
       cacheControl: "2592000",
       contentType: imageFile.type, // Sử dụng contentType thực tế
     });
