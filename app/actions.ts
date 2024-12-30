@@ -107,8 +107,8 @@ export async function CreateDescription(formData: FormData) {
   const data = await prisma.home.update({
     where: { id: homeId },
     data: {
-      title,
-      description,
+      title: title,
+      description: description,
       price: Number(price),
       bedrooms: roomNumber,
       bathrooms: bathroomsNumber,
