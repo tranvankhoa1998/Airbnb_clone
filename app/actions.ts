@@ -80,12 +80,22 @@ export async function CreateDescription(formData: FormData) {
   const roomNumber = formData.get("room") as string;
   const bathroomsNumber = formData.get("bathroom") as string;
 
-  const { data: imageData } = await supabase.storage
+  const allowedContentTypes = ["image/png", "image/jpeg", "image/jpg"];
+  if (!allowedContentTypes.includes(imageFile.type)) {
+    throw new Error("Unsupported file format. Please upload a PNG or JPEG image.");
+  }
+
+  // Tải lên tệp với contentType động
+  const { data: imageData, error } = await supabase.storage
     .from("images")
-    .upload(`${imageFile.name}-${new Date()}`, imageFile, {
+    .upload(`${imageFile.name}-${Date.now()}`, imageFile, {
       cacheControl: "2592000",
-      contentType: "image/png",
+      contentType: imageFile.type, // Sử dụng contentType thực tế
     });
+
+  if (error) {
+    throw new Error(`Failed to upload image: ${error.message}`);
+  }
 
   const data = await prisma.home.update({
     where: {
