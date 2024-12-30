@@ -56,7 +56,7 @@ export async function createAirbnbHome({ userId }: { userId: string }) {
 export async function CreateDescription(formData: FormData) {
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
-  const price = formData.get("price") as string;
+  const price = formData.get("price");
   const imageFile = formData.get("image") as File;
   const homeId = formData.get("homeId") as string;
 
@@ -94,9 +94,9 @@ export async function CreateDescription(formData: FormData) {
       title,
       description,
       price: Number(price),
-      bedrooms: Number(roomNumber) || 0,
-      bathrooms: Number(bathroomsNumber) || 0,
-      guests: Number(guestNumber) || 0,
+      bedrooms: roomNumber,
+      bathrooms: bathroomsNumber,
+      guests: guestNumber,
       photo: imageData?.path,
       addedDescription: true,
     },
