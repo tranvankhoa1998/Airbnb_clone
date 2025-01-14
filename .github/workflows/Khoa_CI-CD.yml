@@ -6,6 +6,10 @@ on:
   push:
     branches-ignore:
       - main
+    branches: 
+     - main
+    types:
+     - merged
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
